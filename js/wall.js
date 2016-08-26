@@ -1,7 +1,7 @@
 
 // Table
-var baseHeight = 270;
-var baseWidth = 400;
+var baseHeight = 300;
+var baseWidth = 300;
 var rows = Math.ceil($('body').height() / baseHeight);
 var cols = Math.ceil($('body').width() / baseWidth);
 var cells = rows * cols;
@@ -160,6 +160,7 @@ function onPlayerStateChange(event) {
   // console.log("EVENT",id,event.data);
   if (event.data == YT.PlayerState.PLAYING) {
     $("#" + id + "_toob").addClass('faded');
+    $("#" + id + "_vid").children().height($("#" + id).height());
     if(!$("#"+soundCell).hasClass("glow")) {
       $("#"+soundCell).addClass("glow");
     }

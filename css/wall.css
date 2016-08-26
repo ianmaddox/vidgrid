@@ -48,6 +48,7 @@ canvas {
 .vid {
   z-index:500;
   animation: fadeIn 3s cubic-bezier(1,.015,.295,1.225);
+  overflow: hidden;
 }
 
 iframe {
