@@ -1,0 +1,129 @@
+body, html {
+  margin:0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+table {
+  width: 100%;
+  height: 100%;
+}
+table, th, td {
+  padding: 0;
+  margin: 1px;
+}
+
+td {
+  position: relative;
+  border-bottom: 4px solid black;
+  border-right: 4px solid black;
+}
+
+.glow {
+  border-bottom: 4px solid white;
+}
+
+#tableParent {
+  height: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.toob {
+  background-image: url("../img/static.gif");
+  background-repeat:repeat;
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  top:0;
+  z-index:1000;
+}
+
+.vid {
+  z-index:500;
+  animation: fadeIn 3s cubic-bezier(1,.015,.295,1.225);
+}
+
+iframe {
+  z-index: 200;
+}
+
+.toob {
+  opacity: 1;
+   transition: opacity 1s ease-in-out;
+   -moz-transition: opacity 1s ease-in-out;
+   -webkit-transition: opacity 1s ease-in-out;
+}
+
+.faded {
+  opacity: 0;
+}
+
+#tuneIn {
+  background-image: url("../img/static.gif");
+  background-repeat:repeat;
+  width: 0px;
+  height: 0px;
+  position: relative;
+  z-index: 2000;
+  top:-50%;
+  margin:auto;
+  transform: translateY(-50%);
+  border-radius:50% 50% 50% 50%;
+}
+
+.doTuneIn {
+  animation: doTuneIn 3s cubic-bezier(1,.015,.295,1.225);
+  animation-fill-mode: forwards;
+}
+
+.clickThru {
+  pointer-events:none;
+}
+
+@keyFrames fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes doTuneIn {
+  0% {
+    opacity: 0;
+  }
+  19% {
+    opacity: 0.5;
+  }
+  20%  {
+    width:50%;
+    height:1px
+    border-radius:100% 100% 100% 100%;
+    opacity: 0.5
+    rotateX(180);
+  }
+  25%  {
+    width:100%;
+    height:30px;
+  }
+  30%  {
+    width:80%;
+    height:20px;
+    opacity:1;
+  }
+  100% {
+    width:100%;
+    height:100%;
+    border-radius:0 0 0 0;
+    rotateX(0);
+  }
+}
