@@ -59,7 +59,7 @@ var allVids = [];
 
 $(document).on("click",".toob",(e) => {
   id = $(e.target).parent().attr('id');
-  ga('send', 'event', 'video', 'click');
+  ga('send', 'event', 'video', 'click', players[id].getVideoData().video_id);
   mute(soundCell);
   soundCell = id;
   unMute(soundCell);
