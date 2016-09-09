@@ -15,8 +15,8 @@ class table {
       Anatomy of the idMap  (row, col)
             Col
       [      V
-        [{},{},{}}],
-Row ->  [{},{},{},
+        [{},{},{}],
+Row ->  [{},{},{}],
         [{},{},{SEE CELL}]
       ]
     */

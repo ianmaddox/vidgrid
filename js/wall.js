@@ -59,6 +59,7 @@ var allVids = [];
 
 $(document).on("click",".toob",(e) => {
   id = $(e.target).parent().attr('id');
+  ga('send', 'event', 'video', 'click');
   mute(soundCell);
   soundCell = id;
   unMute(soundCell);
@@ -164,12 +165,15 @@ function onPlayerStateChange(event) {
     if(!$("#"+soundCell).hasClass("glow")) {
       $("#"+soundCell).addClass("glow");
     }
+    ga('send', 'event', 'video', 'play', event.target.getVideoData().video_id, {nonInteraction: true});
   }
   if (event.data == YT.PlayerState.ENDED) {
     playNext(event);
   }
 }
 function vidError(event) {
+  let id = $(event.target.a).parent().attr("id");
+  ga('send', 'event', 'video', 'error', event.target.getVideoData().video_id, {nonInteraction: true});
   playNext(event);
 }
 
