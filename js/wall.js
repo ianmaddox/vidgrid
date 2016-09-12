@@ -54,6 +54,12 @@ var feeds = [
   'PLq7JnVtvfZsXizd3OIL02JKkwJ_jmNKbW',
   'PLuYsjykjEeUMaCitotTlDdLlvsJUf-UAL',
   'PLzYeG2eBkuklNTE_gp9LLs_QnvPnkq2ai',
+  'PLDj0b7PxY4uC5VD-Y42J3tiJAQvQhKkfT',
+  'PLMTp9RfQQN7OhFNnMN_VP60wRenSeBaTn',
+  'PLZfhJbHjDHamRH300QWhhjE2Z0P0E_NPo',
+  'PLEu62FRB9Fxz6ysHnmzBrXugt9UG32lvv',
+  'PLJgEVV_uaV5r6tCbi6dzSNHRoQ8sf1MuT',
+  'PLcbSG-_15Y7V8pAdZhUOmvTik2Op0jCpS'
 ];
 var allVids = [];
 
@@ -65,7 +71,9 @@ $(document).on("click",".toob",(e) => {
   unMute(soundCell);
 });
 
-
+setInterval(() => {
+  ga('send', 'event', 'site', 'minuteWatched', 'cells', cells);
+}, 1000 * 60);
 
 var tunedIn = false;
 $("#tuneSound").on("play", () => {
