@@ -1,6 +1,6 @@
 // Table
-var baseHeight = 300;
-var baseWidth = 300;
+var baseHeight = 240;
+var baseWidth = 320;
 var rows = Math.ceil($('body').height() / baseHeight);
 var cols = Math.ceil($('body').width() / baseWidth);
 var cells = rows * cols;
@@ -59,7 +59,7 @@ var feeds = [
   'PLzYeG2eBkuklNTE_gp9LLs_QnvPnkq2ai',
 ];
 var allVids = [];
-
+$('#loading').value = "20";
 $(document).on("click",".toob",(e) => {
   id = $(e.target).parent().attr('id');
   ga('send', 'event', 'video', 'click', players[id].getVideoData().video_id);
@@ -79,6 +79,7 @@ $("#tuneSound").on("play", () => {
   }
   tunedIn = true;
 });
+
 setTimeout(() => {
   if(tunedIn === false) {
     $("#tuneIn").addClass("doTuneIn");
@@ -90,6 +91,7 @@ var i = 0;
 console.log("Loading playlists from  youtube...");
 
 for(let feedID of feeds) {
+  $('#loading').value = (i+1) / cells;
   //feed = 'http://www.feedsifter.com/?filters=.&feed=https%3A%2F%2Fwww.youtube.com%2Ffeeds%2Fvideos.xml%3Fplaylist_id%3D' + feedID;
   feed = CORS_PROXY + 'https://www.youtube.com/feeds/videos.xml?playlist_id=' + feedID;
   parser.parseURL(feed, (err, parsed) => {
@@ -119,7 +121,9 @@ new Promise((resolve, reject) => {
 // Don't start the vid loadout until after the images are placed
 setTimeout(() => {
     $("#tuneIn").addClass("faded").remove();
-    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
     po.src = 'https://www.youtube.com/iframe_api';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
 },500 * cells);
@@ -137,6 +141,8 @@ function shuffle(o){
 };
 
 function onYouTubeIframeAPIReady() {
+  $('#loading').addClass('done');
+  setTimeout(()=>$('#loading').hide(), 2000);
   soundCell = t.idLinear(Math.floor(Math.random() * cells));
   for(let i = 0; i < cells; i++) {
     let id = t.idLinear(i);
@@ -206,7 +212,7 @@ console.log("Playing " + id);
   let player = new YT.Player( id + '_vid', {
     videoId: video,
     playerVars: {
-      autoplay: 1,
+      autoplay: 0,
       controls: 0,
       suggestedQuality: 'small'
     },

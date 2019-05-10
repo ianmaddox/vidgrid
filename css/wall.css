@@ -16,6 +16,24 @@ table, th, td {
   margin: 1px;
 }
 
+#loading {
+  z-index: 2010;
+  position: absolute;
+  top:20%;
+  width: 100%;
+  margin:auto;
+  text-align: center;
+  vertical-align: middle;
+  font-size:2em;
+  font-family: 'Fjalla One', sans-serif;
+  color: #EEE;
+}
+
+.done {
+  opacity: 0;
+  transition: visibility 0s linear 2s, opacity 2s linear;
+}
+
 td {
   position: relative;
   border-bottom: 4px solid black;
