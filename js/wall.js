@@ -85,7 +85,7 @@ setTimeout(() => {
     $("#tuneIn").addClass("doTuneIn");
   }
   tunedIn = true;
-},2000);
+},1000);
 
 var i = 0;
 console.log("Loading playlists from  youtube...");
