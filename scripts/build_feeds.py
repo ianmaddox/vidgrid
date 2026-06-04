@@ -402,15 +402,23 @@ def split_monolithic_pool(
     return index
 
 
+def has_cached_metadata(meta: dict) -> bool:
+    """True when a manifest already has any stored metadata for this video."""
+    if not meta:
+        return False
+    return bool(
+        meta.get("title")
+        or meta.get("playability") is not None
+        or "embeddable" in meta
+        or meta.get("aspectSource")
+        or meta.get("width")
+        or meta.get("fetchError")
+    )
+
+
 def can_reuse_metadata(video_id: str, meta: dict) -> bool:
-    """Reuse cached metadata without re-fetching (including known-unavailable)."""
-    if meta.get("embeddable") is False:
-        return True
-    if meta.get("playability") is not None:
-        return True
-    if meta.get("aspectSource") in REUSABLE_ASPECT_SOURCES:
-        return True
-    return "aspectRatio" in meta and meta.get("aspectSource") != "default"
+    """Keep existing manifest metadata; only missing IDs are watch-page fetched."""
+    return has_cached_metadata(meta)
 
 
 def is_available_for_pool(meta: dict) -> bool:
@@ -573,6 +581,15 @@ def build_pool(
         total = len(all_ids)
         fetch_count = 0
         cache_count = 0
+        if refresh_metadata:
+            log(f"Metadata mode: refresh all {total} video(s) (--refresh-metadata)")
+        elif use_metadata_cache:
+            log(
+                f"Metadata mode: backfill only — reuse manifest cache, "
+                f"fetch watch pages for missing IDs (up to {total} video(s))"
+            )
+        else:
+            log(f"Metadata mode: fetch all {total} video(s) (--no-metadata-cache)")
         log(f"Enriching metadata for {total} video(s)...")
         for index, video_id in enumerate(all_ids, start=1):
             prefix = f"  [{index}/{total}] {video_id}"
@@ -599,7 +616,10 @@ def build_pool(
             if metadata_delay > 0 and index < total:
                 time.sleep(metadata_delay)
 
-        log(f"Metadata done: {cache_count} cached, {fetch_count} fetched")
+        log(
+            f"Metadata done: {cache_count} reused from cache, "
+            f"{fetch_count} backfill fetch(es)"
+        )
         log_metadata_fetch_summary(videos_meta)
 
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -656,7 +676,7 @@ def main() -> None:
     parser.add_argument(
         "--refresh-metadata",
         action="store_true",
-        help="Re-fetch all metadata even when cached entries exist",
+        help="Re-fetch watch-page metadata for every video (default: backfill missing only)",
     )
     parser.add_argument(
         "--split-existing",

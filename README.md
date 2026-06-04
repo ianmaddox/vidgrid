@@ -61,8 +61,11 @@ The build script fetches each video's **watch page** and records metadata in eac
 If streaming dimensions are missing, **oEmbed** thumbnail size is used (can differ from video). Fallback is 16:9.
 
 ```bash
-# Faster rebuild without metadata (legacy pool shape)
+# Faster rebuild without metadata (IDs only)
 python scripts/build_feeds.py --skip-metadata
+
+# Backfill: reuse every videos{} entry in data/playlists/, fetch only missing IDs
+python scripts/build_feeds.py --metadata-delay 1.0
 
 # Re-fetch watch-page metadata for every video (ignore cache)
 python scripts/build_feeds.py --refresh-metadata
@@ -71,14 +74,16 @@ python scripts/build_feeds.py --refresh-metadata
 python scripts/build_feeds.py --keep-unavailable
 ```
 
+**Default metadata behavior is backfill-only.** Any video already in a manifest’s `videos`
+map is kept as-is (including partial oEmbed/429 entries). Only IDs with no cached metadata
+are watch-page fetched. Avoid `--refresh-metadata` and `--no-metadata-cache` unless you
+want to re-pull everything.
+
 By default the builder **filters unavailable videos** from each playlist when the
 watch page reports `embeddable=false` or `playability` not `OK`. A watch-page HTTP 429
 (rate limit) does **not** remove videos — oEmbed title/size is kept and the wall filters
 at runtime. For ~2000 videos use a slower delay, e.g.
-`python scripts/build_feeds.py --metadata-delay 1.0`. Cached
-metadata is reused for existing IDs (including known-bad entries), so adding a new
-playlist only fetches watch pages for **new** video IDs. Use `--no-metadata-cache`
-to disable reuse, or `--refresh-metadata` to re-fetch everything.
+`python scripts/build_feeds.py --metadata-delay 1.0`.
 
 RSS feeds often 404 now; playlist IDs are also scraped from the public playlist page (no API key).
 
