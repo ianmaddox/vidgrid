@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-04T06:43:36.795287+00:00",
+  "generatedAt": "2026-06-04T06:59:52.292672+00:00",
   "manifestDir": "playlists",
   "playlists": [
     {
@@ -54,7 +54,7 @@
       "id": "PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje",
       "title": "Time lapse: Graffiti",
       "manifest": "playlists/PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje.json",
-      "videoCount": 46
+      "videoCount": 13
     },
     {
       "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
@@ -64,9 +64,21 @@
     },
     {
       "id": "PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v",
-      "title": "Time lapse: Nature",
+      "title": "Time lapse: Farm sim",
       "manifest": "playlists/PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v.json",
       "videoCount": 100
+    },
+    {
+      "id": "PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel",
+      "title": "TIME LAPSE",
+      "manifest": "playlists/PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk",
+      "title": "Timelapse videos",
+      "manifest": "playlists/PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk.json",
+      "videoCount": 12
     }
   ]
 }
