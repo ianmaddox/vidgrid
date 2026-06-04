@@ -4,13 +4,13 @@
   "playlists": [
     {
       "id": "PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y",
-      "title": "Music Videos",
+      "title": "Visually interesting music videos",
       "manifest": "playlists/PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y.json",
       "videoCount": 97
     },
     {
       "id": "PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0",
-      "title": "Trippy visuals",
+      "title": "Trippy music videos",
       "manifest": "playlists/PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0.json",
       "videoCount": 99
     },
@@ -19,6 +19,18 @@
       "title": "FPV action videos",
       "manifest": "playlists/PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm.json",
       "videoCount": 41
+    },
+    {
+      "id": "PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ",
+      "title": "Cyberpunk nusic videos",
+      "manifest": "playlists/PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ.json",
+      "videoCount": 50
+    },
+    {
+      "id": "PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ",
+      "title": "Slow TV - Norway",
+      "manifest": "playlists/PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ.json",
+      "videoCount": 24
     }
   ]
 }
