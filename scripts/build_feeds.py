@@ -455,68 +455,166 @@ def format_meta_summary(meta: dict) -> str:
     return f"{dims} {source} — {label[:48]}"
 
 
-def write_manifest_outputs(
-    playlists_out: list[dict],
-    videos_meta: dict[str, dict],
-    generated_at: str,
-    filter_unavailable: bool,
-    index_path: Path,
-    manifests_dir: Path,
+def load_existing_index_playlists(index_path: Path) -> list[dict]:
+    if not index_path.is_file():
+        return []
+    try:
+        pool = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        log(f"warning: could not read index for merge {index_path}: {exc}")
+        return []
+    playlists = pool.get("playlists") or []
+    return [entry for entry in playlists if isinstance(entry, dict) and entry.get("id")]
+
+
+def merge_index_entry(fresh: dict, prior: dict | None) -> dict:
+    """Keep a non-blank title already on disk (hand-edited in the index)."""
+    merged = dict(fresh)
+    if prior:
+        prior_title = (prior.get("title") or "").strip()
+        if prior_title:
+            merged["title"] = prior_title
+    return merged
+
+
+def write_pool_index(
+    index_path: Path, generated_at: str, processed_playlists: list[dict]
 ) -> dict:
-    manifests_dir.mkdir(parents=True, exist_ok=True)
-    index_playlists: list[dict] = []
-    dropped_total = 0
-    total_videos = 0
-    meta_count = 0
+    """Merge this run's playlists into the index without dropping or renaming others."""
+    prior_playlists = load_existing_index_playlists(index_path)
+    prior_by_id = {entry["id"]: entry for entry in prior_playlists}
+    processed_by_id = {
+        entry["id"]: entry for entry in processed_playlists if entry.get("id")
+    }
 
-    for playlist in playlists_out:
-        video_ids = playlist["videoIds"]
-        if filter_unavailable and videos_meta:
-            video_ids, pl_videos, dropped = filter_playlist_video_ids(
-                video_ids, videos_meta
+    merged: list[dict] = []
+    seen: set[str] = set()
+
+    for prior in prior_playlists:
+        playlist_id = prior["id"]
+        if playlist_id in processed_by_id:
+            merged.append(
+                merge_index_entry(processed_by_id[playlist_id], prior)
             )
-            dropped_total += dropped
         else:
-            pl_videos = {
-                vid: videos_meta[vid] for vid in video_ids if vid in videos_meta
-            }
+            merged.append(dict(prior))
+        seen.add(playlist_id)
 
-        manifest = {
-            "id": playlist["id"],
-            "title": playlist["title"],
-            "generatedAt": generated_at,
-            "videoIds": video_ids,
-            "videos": pl_videos,
-        }
-        manifest_path = manifest_file_path(playlist["id"])
-        write_playlist_manifest(manifest, manifest_path)
-        index_playlists.append(
-            {
-                "id": playlist["id"],
-                "title": playlist["title"],
-                "manifest": manifest_web_path(playlist["id"]),
-                "videoCount": len(video_ids),
-            }
-        )
-        total_videos += len(video_ids)
-        meta_count += len(pl_videos)
-        log(f"  manifest {manifest_path.name} ({len(video_ids)} videos)")
-
-    if dropped_total:
-        log(f"filtered {dropped_total} unavailable video(s) from playlists")
+    for fresh in processed_playlists:
+        playlist_id = fresh.get("id")
+        if not playlist_id or playlist_id in seen:
+            continue
+        merged.append(merge_index_entry(fresh, prior_by_id.get(playlist_id)))
+        seen.add(playlist_id)
 
     index = {
         "generatedAt": generated_at,
         "manifestDir": MANIFEST_WEB_DIR,
-        "playlists": index_playlists,
+        "playlists": merged,
     }
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
-    log(
-        f"wrote {index_path} ({len(index_playlists)} playlists, {total_videos} videos"
-        + (f", {meta_count} with metadata in manifests)" if meta_count else ")")
-    )
     return index
+
+
+def emit_playlist_manifest(
+    playlist: dict,
+    videos_meta: dict[str, dict],
+    generated_at: str,
+    filter_unavailable: bool,
+    manifests_dir: Path,
+) -> tuple[dict, int]:
+    """Write one manifest file; return index entry and filtered-out count."""
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    video_ids = playlist["videoIds"]
+    if filter_unavailable and videos_meta:
+        video_ids, pl_videos, dropped = filter_playlist_video_ids(
+            video_ids, videos_meta
+        )
+    else:
+        dropped = 0
+        pl_videos = {
+            vid: videos_meta[vid] for vid in video_ids if vid in videos_meta
+        }
+
+    manifest_path = manifest_file_path(playlist["id"])
+    title = playlist["title"]
+    if manifest_path.is_file():
+        try:
+            existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+            kept_title = (existing.get("title") or "").strip()
+            if kept_title:
+                title = kept_title
+        except (OSError, json.JSONDecodeError):
+            pass
+
+    manifest = {
+        "id": playlist["id"],
+        "title": title,
+        "generatedAt": generated_at,
+        "videoIds": video_ids,
+        "videos": pl_videos,
+    }
+    write_playlist_manifest(manifest, manifest_path)
+    log(f"  wrote {manifest_path.name} ({len(video_ids)} videos)")
+    index_entry = {
+        "id": playlist["id"],
+        "title": title,
+        "manifest": manifest_web_path(playlist["id"]),
+        "videoCount": len(video_ids),
+    }
+    return index_entry, dropped
+
+
+def enrich_playlist_metadata(
+    playlist: dict,
+    playlist_index: int,
+    playlist_total: int,
+    videos_meta: dict[str, dict],
+    cached_videos: dict[str, dict],
+    use_metadata_cache: bool,
+    refresh_metadata: bool,
+    metadata_delay: float,
+) -> tuple[int, int]:
+    """Fetch metadata for this playlist's IDs; return (cache_hits, fetch_count)."""
+    video_ids = playlist["videoIds"]
+    cache_count = 0
+    fetch_count = 0
+    pl_total = len(video_ids)
+
+    log(f"  [{playlist_index}/{playlist_total}] metadata for {playlist['id']} ({pl_total} video(s))...")
+    for video_index, video_id in enumerate(video_ids, start=1):
+        prefix = f"    [{video_index}/{pl_total}] {video_id}"
+
+        if video_id in videos_meta:
+            cache_count += 1
+            log(f"{prefix} reused {format_meta_summary(videos_meta[video_id])}")
+            continue
+
+        existing = cached_videos.get(video_id)
+        if (
+            use_metadata_cache
+            and not refresh_metadata
+            and existing
+            and can_reuse_metadata(video_id, existing)
+        ):
+            videos_meta[video_id] = existing
+            cache_count += 1
+            log(f"{prefix} cached {format_meta_summary(existing)}")
+            continue
+
+        log(f"{prefix} fetching watch page ...")
+        started = time.monotonic()
+        videos_meta[video_id] = enrich_video(video_id)
+        fetch_count += 1
+        meta = videos_meta[video_id]
+        elapsed = time.monotonic() - started
+        status = "ok" if not meta.get("fetchError") else "warn"
+        log(f"{prefix} {status} ({elapsed:.1f}s) {format_meta_summary(meta)}")
+        if metadata_delay > 0:
+            time.sleep(metadata_delay)
+
+    return cache_count, fetch_count
 
 
 def build_pool(
@@ -530,12 +628,33 @@ def build_pool(
     use_metadata_cache: bool,
     refresh_metadata: bool,
 ) -> dict:
-    playlists_out: list[dict] = []
-    all_ids: list[str] = []
-    seen: set[str] = set()
     cached_titles = load_cached_playlist_titles(index_path)
+    generated_at = datetime.now(timezone.utc).isoformat()
+    manifests_dir.mkdir(parents=True, exist_ok=True)
 
-    log(f"Fetching {len(playlist_ids)} playlist(s)...")
+    videos_meta: dict[str, dict] = {}
+    cached_videos: dict[str, dict] = {}
+    if fetch_metadata and use_metadata_cache and not refresh_metadata:
+        cached_videos = load_all_cached_videos(index_path, manifests_dir)
+        if cached_videos:
+            log(f"Loaded {len(cached_videos)} cached metadata entries from manifests/index")
+
+    if fetch_metadata:
+        if refresh_metadata:
+            log("Metadata mode: refresh all (--refresh-metadata)")
+        elif use_metadata_cache:
+            log("Metadata mode: backfill only — reuse manifest cache, fetch missing IDs")
+        else:
+            log("Metadata mode: fetch all (--no-metadata-cache)")
+
+    index_playlists: list[dict] = []
+    dropped_total = 0
+    cache_count = 0
+    fetch_count = 0
+    playlist_total = len(playlist_ids)
+    apply_filter = filter_unavailable and fetch_metadata
+
+    log(f"Processing {playlist_total} playlist(s)...")
     for playlist_index, playlist_id in enumerate(playlist_ids, start=1):
         if not PLAYLIST_ID_RE.match(playlist_id):
             print(f"skip invalid playlist id: {playlist_id}", file=sys.stderr)
@@ -543,7 +662,7 @@ def build_pool(
                 sys.exit(1)
             continue
 
-        log(f"  [{playlist_index}/{len(playlist_ids)}] {playlist_id} ...")
+        log(f"  [{playlist_index}/{playlist_total}] {playlist_id} scrape ...")
         started = time.monotonic()
         try:
             title, video_ids, source = load_playlist(playlist_id)
@@ -558,79 +677,53 @@ def build_pool(
             f"  ok {playlist_id}: {title} ({len(video_ids)} videos, via {source}, "
             f"{elapsed:.1f}s)"
         )
-        playlists_out.append(
-            {
-                "id": playlist_id,
-                "title": resolve_playlist_title(playlist_id, title, cached_titles),
-                "videoIds": video_ids,
-            }
-        )
-        for vid in video_ids:
-            if vid not in seen:
-                seen.add(vid)
-                all_ids.append(vid)
+        playlist = {
+            "id": playlist_id,
+            "title": resolve_playlist_title(playlist_id, title, cached_titles),
+            "videoIds": video_ids,
+        }
 
-    videos_meta: dict[str, dict] = {}
-    if fetch_metadata:
-        cached_videos: dict[str, dict] = {}
-        if use_metadata_cache and not refresh_metadata:
-            cached_videos = load_all_cached_videos(index_path, manifests_dir)
-            if cached_videos:
-                log(f"Loaded {len(cached_videos)} cached metadata entries from manifests/index")
-
-        total = len(all_ids)
-        fetch_count = 0
-        cache_count = 0
-        if refresh_metadata:
-            log(f"Metadata mode: refresh all {total} video(s) (--refresh-metadata)")
-        elif use_metadata_cache:
-            log(
-                f"Metadata mode: backfill only — reuse manifest cache, "
-                f"fetch watch pages for missing IDs (up to {total} video(s))"
+        if fetch_metadata:
+            pl_cache, pl_fetch = enrich_playlist_metadata(
+                playlist,
+                playlist_index,
+                playlist_total,
+                videos_meta,
+                cached_videos,
+                use_metadata_cache,
+                refresh_metadata,
+                metadata_delay,
             )
-        else:
-            log(f"Metadata mode: fetch all {total} video(s) (--no-metadata-cache)")
-        log(f"Enriching metadata for {total} video(s)...")
-        for index, video_id in enumerate(all_ids, start=1):
-            prefix = f"  [{index}/{total}] {video_id}"
-            existing = cached_videos.get(video_id)
-            if (
-                use_metadata_cache
-                and not refresh_metadata
-                and existing
-                and can_reuse_metadata(video_id, existing)
-            ):
-                videos_meta[video_id] = existing
-                cache_count += 1
-                log(f"{prefix} cached {format_meta_summary(existing)}")
-                continue
+            cache_count += pl_cache
+            fetch_count += pl_fetch
 
-            log(f"{prefix} fetching watch page ...")
-            started = time.monotonic()
-            videos_meta[video_id] = enrich_video(video_id)
-            fetch_count += 1
-            meta = videos_meta[video_id]
-            elapsed = time.monotonic() - started
-            status = "ok" if not meta.get("fetchError") else "warn"
-            log(f"{prefix} {status} ({elapsed:.1f}s) {format_meta_summary(meta)}")
-            if metadata_delay > 0 and index < total:
-                time.sleep(metadata_delay)
+        index_entry, dropped = emit_playlist_manifest(
+            playlist,
+            videos_meta,
+            generated_at,
+            apply_filter,
+            manifests_dir,
+        )
+        dropped_total += dropped
+        index_playlists.append(index_entry)
+        write_pool_index(index_path, generated_at, index_playlists)
+        log(f"  updated {index_path} ({len(index_playlists)} playlist(s) in index)")
 
+    if fetch_metadata:
         log(
             f"Metadata done: {cache_count} reused from cache, "
             f"{fetch_count} backfill fetch(es)"
         )
         log_metadata_fetch_summary(videos_meta)
 
-    generated_at = datetime.now(timezone.utc).isoformat()
-    return write_manifest_outputs(
-        playlists_out,
-        videos_meta,
-        generated_at,
-        filter_unavailable and bool(videos_meta),
-        index_path,
-        manifests_dir,
+    if dropped_total:
+        log(f"filtered {dropped_total} unavailable video(s) from playlists")
+
+    total_videos = sum(entry["videoCount"] for entry in index_playlists)
+    log(
+        f"done {index_path} ({len(index_playlists)} playlists, {total_videos} videos)"
     )
+    return write_pool_index(index_path, generated_at, index_playlists)
 
 
 def main() -> None:

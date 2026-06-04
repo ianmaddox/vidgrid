@@ -1,12 +1,24 @@
 {
-  "generatedAt": "2026-06-04T06:19:49.901320+00:00",
+  "generatedAt": "2026-06-04T06:43:36.795287+00:00",
   "manifestDir": "playlists",
   "playlists": [
     {
-
+      "id": "PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y",
+      "title": "Music Videos",
+      "manifest": "playlists/PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y.json",
+      "videoCount": 97
+    },
+    {
       "id": "PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0",
-      "title": "Trippy videos",
+      "title": "Trippy visuals",
       "manifest": "playlists/PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0.json",
-      "videoCount": 50
-    }  ]
+      "videoCount": 99
+    },
+    {
+      "id": "PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm",
+      "title": "fpv Music",
+      "manifest": "playlists/PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm.json",
+      "videoCount": 41
+    }
+  ]
 }

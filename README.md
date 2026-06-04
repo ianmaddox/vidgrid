@@ -39,7 +39,9 @@ Committed so the site works without rebuilding on every deploy. The wall loads t
 then fetches **one** manifest for the active playlist (or when you switch themes).
 
 **Custom titles:** Edit `title` in the index or manifest. Rebuilds keep your title when it is
-non-blank; only empty titles are refreshed from YouTube.
+non-blank; only empty titles are refreshed from YouTube. During a long build, each index write
+merges with the file on disk so finished playlists keep hand-edited names and playlists not
+processed yet stay listed.
 
 To split an existing monolithic `video-pool.json` without re-scraping YouTube:
 
