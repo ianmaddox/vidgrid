@@ -1,0 +1,4 @@
+# One YouTube playlist ID per line (from ?list= in the playlist URL).
+# Re-run: python scripts/build_feeds.py
+
+PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y

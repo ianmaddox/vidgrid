@@ -1,2 +1,7 @@
-deploy.sh
+firebase-debug.log
 .DS_Store
+__pycache__/
+*.pyc
+.env
+s3-backup
+.vscode

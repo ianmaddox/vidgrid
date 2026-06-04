@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <!-- Author: https://twitter.com/IanAMaddox -->
+  <meta http-equiv="Permissions-Policy" content="compute-pressure=()">
   <title>VidGrid - All the Video You Can Handle, All At Once</title>
   <meta name="keywords" content="Youtube,video,clip,vine,grid,matrix,wall,panel,hq,mission control,player,collection,playlist,random">
   <meta name="description" content="A Randomly Generated Wall of YouTube Videos">
@@ -10,32 +10,29 @@
 
   <meta property="og:title" content="VidGrid - All the Video You Can Handle, All At Once" />
   <meta property="og:type" content="video.other" />
-  <meta property="og:url" content="http://www.vidgrid.party/" />
-  <meta property="og:image" content="http://www.vidgrid.party/img/screenshot.lrg.png" />
+  <meta property="og:url" content="https://vidgrid.tiz.io/" />
+  <meta property="og:image" content="https://vidgrid.tiz.io/img/screenshot.lrg.png" />
   <meta property="og:description" content="A Randomly Generated Wall of YouTube Videos">
   <link href="https://fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet">
 
   <link rel="icon" sizes="1920x961" href="img/screenshot.lrg.png">
   <link rel="icon" sizes="500x500" href="img/screenshot.med.png">
   <link rel="icon" sizes="200x200" href="img/screenshot.ico.png">
-  <link rel="stylesheet" href="css/wall.css?v=1.0">
-
+  <link rel="stylesheet" href="css/wall.css?v=2.2">
 </head>
 
-<body id="body">
-
-  <div id="tableParent"></div>
-  <div id="loading"><img src="img/loading.gif"><br>Loading...</div>
+<body>
+  <div id="loading">Loading video pool…</div>
+  <div id="poolError" hidden></div>
   <div id="tuneIn"></div>
+  <div id="tableParent"></div>
   <audio id="tuneSound" controls autoplay hidden>
     <source src="img/tunein.mp3" type="audio/mpeg">
   </audio>
 
-  <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js" integrity="sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8=" crossorigin="anonymous"></script>
-  <script src="http://cdn.rawgit.com/bobby-brennan/rss-parser/master/dist/rss-parser.js"></script>  <script src="js/table.js"></script>
-  <script src="js/tunein.js"></script>
-  <script src="js/wall.js"></script>
-  <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-168906-16', 'auto');ga('send', 'pageview');</script>
+  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+  <script src="js/table.js"></script>
+  <script src="js/wall.js?v=2.2"></script>
 </body>
 
 </html>
