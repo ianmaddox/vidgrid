@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build data/video-pool.json from YouTube playlist RSS feeds."""
+"""Build data/video-pool.json (index) and per-playlist manifests under data/playlists/."""
 
 from __future__ import annotations
 
@@ -7,7 +7,9 @@ import argparse
 import json
 import re
 import sys
+import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -16,8 +18,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PLAYLISTS_PATH = ROOT / "data" / "playlists.txt"
 OUTPUT_PATH = ROOT / "data" / "video-pool.json"
+MANIFESTS_DIR = ROOT / "data" / "playlists"
+MANIFEST_WEB_DIR = "playlists"
 RSS_URL = "https://www.youtube.com/feeds/videos.xml?playlist_id={playlist_id}"
 PLAYLIST_PAGE_URL = "https://www.youtube.com/playlist?list={playlist_id}"
+WATCH_URL = "https://www.youtube.com/watch?v={video_id}"
 USER_AGENT = "Mozilla/5.0 (compatible; vidgrid-build-feeds/1.0)"
 ATOM_NS = "http://www.w3.org/2005/Atom"
 YT_NS = "http://www.youtube.com/xml/schemas/2015"
@@ -25,6 +30,13 @@ PLAYLIST_ID_RE = re.compile(r"^PL[\w-]+$")
 VIDEO_ID_RE = re.compile(r"(?:v=|/shorts/|youtu\.be/)([A-Za-z0-9_-]{11})")
 PAGE_VIDEO_ID_RE = re.compile(r'"videoId":"([A-Za-z0-9_-]{11})"')
 PAGE_TITLE_RE = re.compile(r'<meta name="title" content="([^"]+)"')
+PLAYER_RESPONSE_MARKER = "ytInitialPlayerResponse"
+REUSABLE_ASPECT_SOURCES = frozenset({"streaming", "oembed"})
+PLAYABILITY_OK = "OK"
+
+
+def log(message: str) -> None:
+    print(message, flush=True)
 
 
 def load_playlist_ids(path: Path) -> list[str]:
@@ -36,10 +48,24 @@ def load_playlist_ids(path: Path) -> list[str]:
     return ids
 
 
-def fetch_url(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.read()
+def fetch_url(url: str, retries: int = 3) -> bytes:
+    last_exc: urllib.error.HTTPError | None = None
+    for attempt in range(retries):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read()
+        except urllib.error.HTTPError as exc:
+            last_exc = exc
+            if exc.code == 429 and attempt < retries - 1:
+                wait = min(60, 2 ** (attempt + 2))
+                log(f"  rate limited (429), waiting {wait}s before retry ...")
+                time.sleep(wait)
+                continue
+            raise
+    if last_exc:
+        raise last_exc
+    raise RuntimeError("fetch_url failed without exception")
 
 
 def fetch_playlist_xml(playlist_id: str) -> bytes:
@@ -100,18 +126,417 @@ def load_playlist(playlist_id: str) -> tuple[str, list[str], str]:
     return title, video_ids, "page"
 
 
-def build_pool(playlist_ids: list[str], strict: bool) -> dict:
+def parse_player_response(html: str) -> dict | None:
+    idx = html.find(PLAYER_RESPONSE_MARKER)
+    if idx < 0:
+        return None
+    brace = html.find("{", idx)
+    if brace < 0:
+        return None
+    depth = 0
+    for pos, char in enumerate(html[brace:], start=brace):
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return json.loads(html[brace : pos + 1])
+    return None
+
+
+def stream_dimensions(player_response: dict) -> tuple[int, int] | None:
+    streaming = player_response.get("streamingData") or {}
+    candidates: list[tuple[int, int]] = []
+    for fmt in (streaming.get("formats") or []) + (streaming.get("adaptiveFormats") or []):
+        mime = fmt.get("mimeType") or ""
+        if not mime.startswith("video/"):
+            continue
+        width = fmt.get("width")
+        height = fmt.get("height")
+        if width and height:
+            candidates.append((int(width), int(height)))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda wh: wh[0] * wh[1])
+
+
+def fetch_oembed(video_id: str) -> dict | None:
+    url = (
+        "https://www.youtube.com/oembed?url="
+        + urllib.parse.quote(f"https://www.youtube.com/watch?v={video_id}", safe="")
+        + "&format=json"
+    )
+    try:
+        payload = json.loads(fetch_url(url))
+    except (urllib.error.URLError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def apply_stream_dims(meta: dict, width: int, height: int) -> None:
+    meta["width"] = width
+    meta["height"] = height
+    meta["aspectRatio"] = round(width / height, 6)
+    meta["aspectSource"] = "streaming"
+
+
+def apply_oembed_dims(meta: dict, oembed: dict) -> None:
+    width = oembed.get("thumbnail_width") or oembed.get("width")
+    height = oembed.get("thumbnail_height") or oembed.get("height")
+    if not width or not height:
+        return
+    meta["width"] = int(width)
+    meta["height"] = int(height)
+    meta["aspectRatio"] = round(int(width) / int(height), 6)
+    meta["aspectSource"] = "oembed"
+
+
+def enrich_video(video_id: str) -> dict:
+    meta: dict = {}
+
+    try:
+        html = fetch_url(WATCH_URL.format(video_id=video_id)).decode("utf-8", "replace")
+        player_response = parse_player_response(html)
+        if player_response:
+            video_details = player_response.get("videoDetails") or {}
+            if video_details.get("title"):
+                meta["title"] = video_details["title"]
+            if video_details.get("author"):
+                meta["author"] = video_details["author"]
+            length = video_details.get("lengthSeconds")
+            if length is not None:
+                meta["durationSeconds"] = int(length)
+
+            playability = player_response.get("playabilityStatus") or {}
+            meta["playability"] = playability.get("status")
+            meta["embeddable"] = bool(playability.get("playableInEmbed", True))
+
+            microformat = (
+                player_response.get("microformat", {})
+                .get("playerMicroformatRenderer", {})
+            )
+            if microformat.get("category"):
+                meta["category"] = microformat["category"]
+
+            dims = stream_dimensions(player_response)
+            if dims:
+                apply_stream_dims(meta, dims[0], dims[1])
+    except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError, ValueError) as exc:
+        meta["fetchError"] = str(exc)
+
+    if "aspectRatio" not in meta:
+        oembed = fetch_oembed(video_id)
+        if oembed:
+            if not meta.get("title") and oembed.get("title"):
+                meta["title"] = oembed["title"]
+            if not meta.get("author") and oembed.get("author_name"):
+                meta["author"] = oembed["author_name"]
+            apply_oembed_dims(meta, oembed)
+
+    if "embeddable" not in meta:
+        meta["embeddable"] = True
+    if "aspectRatio" not in meta:
+        meta["aspectRatio"] = round(16 / 9, 6)
+        meta["aspectSource"] = "default"
+
+    return meta
+
+
+def manifest_file_path(playlist_id: str) -> Path:
+    return MANIFESTS_DIR / f"{playlist_id}.json"
+
+
+def manifest_web_path(playlist_id: str) -> str:
+    return f"{MANIFEST_WEB_DIR}/{playlist_id}.json"
+
+
+def load_cached_playlist_titles(index_path: Path) -> dict[str, str]:
+    titles: dict[str, str] = {}
+    if index_path.is_file():
+        try:
+            pool = json.loads(index_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            log(f"warning: could not read playlist titles from {index_path}: {exc}")
+        else:
+            for playlist in pool.get("playlists") or []:
+                if not isinstance(playlist, dict):
+                    continue
+                playlist_id = playlist.get("id")
+                if not playlist_id:
+                    continue
+                title = (playlist.get("title") or "").strip()
+                if title:
+                    titles[playlist_id] = title
+    if MANIFESTS_DIR.is_dir():
+        for path in MANIFESTS_DIR.glob("PL*.json"):
+            try:
+                manifest = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            playlist_id = manifest.get("id") or path.stem
+            title = (manifest.get("title") or "").strip()
+            if title:
+                titles[playlist_id] = title
+    return titles
+
+
+def resolve_playlist_title(
+    playlist_id: str, fetched_title: str, cached_titles: dict[str, str]
+) -> str:
+    kept = cached_titles.get(playlist_id, "").strip()
+    if kept:
+        return kept
+    stripped = fetched_title.strip()
+    return stripped if stripped else playlist_id
+
+
+def load_cached_videos(path: Path) -> dict[str, dict]:
+    if not path.is_file():
+        return {}
+    try:
+        pool = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        log(f"warning: could not read cache {path}: {exc}")
+        return {}
+    videos = pool.get("videos")
+    if not isinstance(videos, dict):
+        return {}
+    return {vid: meta for vid, meta in videos.items() if isinstance(meta, dict)}
+
+
+def load_cached_videos_from_manifests(manifests_dir: Path) -> dict[str, dict]:
+    merged: dict[str, dict] = {}
+    if not manifests_dir.is_dir():
+        return merged
+    for path in sorted(manifests_dir.glob("PL*.json")):
+        merged.update(load_cached_videos(path))
+    return merged
+
+
+def load_all_cached_videos(index_path: Path, manifests_dir: Path) -> dict[str, dict]:
+    cached = load_cached_videos_from_manifests(manifests_dir)
+    legacy = load_cached_videos(index_path)
+    if legacy:
+        cached.update(legacy)
+    return cached
+
+
+def filter_playlist_video_ids(
+    video_ids: list[str], videos_meta: dict[str, dict]
+) -> tuple[list[str], dict[str, dict], int]:
+    before = len(video_ids)
+    filtered = [
+        vid for vid in video_ids if is_available_for_pool(videos_meta.get(vid, {}))
+    ]
+    pl_videos = {vid: videos_meta[vid] for vid in filtered if vid in videos_meta}
+    return filtered, pl_videos, before - len(filtered)
+
+
+def write_playlist_manifest(manifest: dict, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
+def is_monolithic_pool(pool: dict) -> bool:
+    for playlist in pool.get("playlists") or []:
+        if isinstance(playlist, dict) and playlist.get("videoIds"):
+            return True
+    return bool(pool.get("videos"))
+
+
+def split_monolithic_pool(
+    pool_path: Path,
+    index_path: Path,
+    manifests_dir: Path,
+) -> dict:
+    pool = json.loads(pool_path.read_text(encoding="utf-8"))
+    if not is_monolithic_pool(pool):
+        log("pool already uses manifest index (no inline videoIds); nothing to split")
+        return pool
+
+    generated_at = pool.get("generatedAt") or datetime.now(timezone.utc).isoformat()
+    all_videos = pool.get("videos") or {}
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    index_playlists: list[dict] = []
+    total_videos = 0
+
+    for playlist in pool.get("playlists") or []:
+        if not isinstance(playlist, dict):
+            continue
+        playlist_id = playlist.get("id")
+        if not playlist_id:
+            continue
+        video_ids = playlist.get("videoIds") or []
+        pl_videos = {vid: all_videos[vid] for vid in video_ids if vid in all_videos}
+        manifest = {
+            "id": playlist_id,
+            "title": playlist.get("title") or playlist_id,
+            "generatedAt": generated_at,
+            "videoIds": video_ids,
+            "videos": pl_videos,
+        }
+        manifest_path = manifest_file_path(playlist_id)
+        write_playlist_manifest(manifest, manifest_path)
+        index_playlists.append(
+            {
+                "id": playlist_id,
+                "title": manifest["title"],
+                "manifest": manifest_web_path(playlist_id),
+                "videoCount": len(video_ids),
+            }
+        )
+        total_videos += len(video_ids)
+        log(f"  wrote {manifest_path.name} ({len(video_ids)} videos)")
+
+    index = {
+        "generatedAt": generated_at,
+        "manifestDir": MANIFEST_WEB_DIR,
+        "playlists": index_playlists,
+    }
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+    log(
+        f"wrote index {index_path} ({len(index_playlists)} playlists, "
+        f"{total_videos} videos total)"
+    )
+    return index
+
+
+def can_reuse_metadata(video_id: str, meta: dict) -> bool:
+    """Reuse cached metadata without re-fetching (including known-unavailable)."""
+    if meta.get("embeddable") is False:
+        return True
+    if meta.get("playability") is not None:
+        return True
+    if meta.get("aspectSource") in REUSABLE_ASPECT_SOURCES:
+        return True
+    return "aspectRatio" in meta and meta.get("aspectSource") != "default"
+
+
+def is_available_for_pool(meta: dict) -> bool:
+    """Drop only when watch-page data proves the video cannot embed."""
+    if not meta:
+        return False
+    if meta.get("embeddable") is False:
+        return False
+    status = meta.get("playability")
+    if status is not None and status != PLAYABILITY_OK:
+        return False
+    return True
+
+
+def log_metadata_fetch_summary(videos_meta: dict[str, dict]) -> None:
+    rate_limited = sum(
+        1
+        for meta in videos_meta.values()
+        if meta.get("fetchError") and "429" in str(meta.get("fetchError"))
+    )
+    if rate_limited:
+        log(
+            f"warning: {rate_limited} video(s) hit HTTP 429 on the watch page; "
+            "kept in pool with oEmbed/default metadata (raise --metadata-delay if this persists)"
+        )
+
+
+def format_meta_summary(meta: dict) -> str:
+    width = meta.get("width")
+    height = meta.get("height")
+    dims = f"{width}x{height}" if width and height else "?"
+    source = meta.get("aspectSource") or "?"
+    label = meta.get("title") or meta.get("id") or "?"
+    return f"{dims} {source} — {label[:48]}"
+
+
+def write_manifest_outputs(
+    playlists_out: list[dict],
+    videos_meta: dict[str, dict],
+    generated_at: str,
+    filter_unavailable: bool,
+    index_path: Path,
+    manifests_dir: Path,
+) -> dict:
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    index_playlists: list[dict] = []
+    dropped_total = 0
+    total_videos = 0
+    meta_count = 0
+
+    for playlist in playlists_out:
+        video_ids = playlist["videoIds"]
+        if filter_unavailable and videos_meta:
+            video_ids, pl_videos, dropped = filter_playlist_video_ids(
+                video_ids, videos_meta
+            )
+            dropped_total += dropped
+        else:
+            pl_videos = {
+                vid: videos_meta[vid] for vid in video_ids if vid in videos_meta
+            }
+
+        manifest = {
+            "id": playlist["id"],
+            "title": playlist["title"],
+            "generatedAt": generated_at,
+            "videoIds": video_ids,
+            "videos": pl_videos,
+        }
+        manifest_path = manifest_file_path(playlist["id"])
+        write_playlist_manifest(manifest, manifest_path)
+        index_playlists.append(
+            {
+                "id": playlist["id"],
+                "title": playlist["title"],
+                "manifest": manifest_web_path(playlist["id"]),
+                "videoCount": len(video_ids),
+            }
+        )
+        total_videos += len(video_ids)
+        meta_count += len(pl_videos)
+        log(f"  manifest {manifest_path.name} ({len(video_ids)} videos)")
+
+    if dropped_total:
+        log(f"filtered {dropped_total} unavailable video(s) from playlists")
+
+    index = {
+        "generatedAt": generated_at,
+        "manifestDir": MANIFEST_WEB_DIR,
+        "playlists": index_playlists,
+    }
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+    log(
+        f"wrote {index_path} ({len(index_playlists)} playlists, {total_videos} videos"
+        + (f", {meta_count} with metadata in manifests)" if meta_count else ")")
+    )
+    return index
+
+
+def build_pool(
+    playlist_ids: list[str],
+    strict: bool,
+    fetch_metadata: bool,
+    filter_unavailable: bool,
+    metadata_delay: float,
+    index_path: Path,
+    manifests_dir: Path,
+    use_metadata_cache: bool,
+    refresh_metadata: bool,
+) -> dict:
     playlists_out: list[dict] = []
     all_ids: list[str] = []
     seen: set[str] = set()
+    cached_titles = load_cached_playlist_titles(index_path)
 
-    for playlist_id in playlist_ids:
+    log(f"Fetching {len(playlist_ids)} playlist(s)...")
+    for playlist_index, playlist_id in enumerate(playlist_ids, start=1):
         if not PLAYLIST_ID_RE.match(playlist_id):
             print(f"skip invalid playlist id: {playlist_id}", file=sys.stderr)
             if strict:
                 sys.exit(1)
             continue
 
+        log(f"  [{playlist_index}/{len(playlist_ids)}] {playlist_id} ...")
+        started = time.monotonic()
         try:
             title, video_ids, source = load_playlist(playlist_id)
         except (urllib.error.HTTPError, urllib.error.URLError, ET.ParseError, ValueError) as exc:
@@ -120,20 +545,72 @@ def build_pool(playlist_ids: list[str], strict: bool) -> dict:
                 sys.exit(1)
             continue
 
-        print(f"ok {playlist_id}: {title} ({len(video_ids)} videos, via {source})")
+        elapsed = time.monotonic() - started
+        log(
+            f"  ok {playlist_id}: {title} ({len(video_ids)} videos, via {source}, "
+            f"{elapsed:.1f}s)"
+        )
         playlists_out.append(
-            {"id": playlist_id, "title": title, "videoIds": video_ids}
+            {
+                "id": playlist_id,
+                "title": resolve_playlist_title(playlist_id, title, cached_titles),
+                "videoIds": video_ids,
+            }
         )
         for vid in video_ids:
             if vid not in seen:
                 seen.add(vid)
                 all_ids.append(vid)
 
-    return {
-        "generatedAt": datetime.now(timezone.utc).isoformat(),
-        "playlists": playlists_out,
-        "videoIds": all_ids,
-    }
+    videos_meta: dict[str, dict] = {}
+    if fetch_metadata:
+        cached_videos: dict[str, dict] = {}
+        if use_metadata_cache and not refresh_metadata:
+            cached_videos = load_all_cached_videos(index_path, manifests_dir)
+            if cached_videos:
+                log(f"Loaded {len(cached_videos)} cached metadata entries from manifests/index")
+
+        total = len(all_ids)
+        fetch_count = 0
+        cache_count = 0
+        log(f"Enriching metadata for {total} video(s)...")
+        for index, video_id in enumerate(all_ids, start=1):
+            prefix = f"  [{index}/{total}] {video_id}"
+            existing = cached_videos.get(video_id)
+            if (
+                use_metadata_cache
+                and not refresh_metadata
+                and existing
+                and can_reuse_metadata(video_id, existing)
+            ):
+                videos_meta[video_id] = existing
+                cache_count += 1
+                log(f"{prefix} cached {format_meta_summary(existing)}")
+                continue
+
+            log(f"{prefix} fetching watch page ...")
+            started = time.monotonic()
+            videos_meta[video_id] = enrich_video(video_id)
+            fetch_count += 1
+            meta = videos_meta[video_id]
+            elapsed = time.monotonic() - started
+            status = "ok" if not meta.get("fetchError") else "warn"
+            log(f"{prefix} {status} ({elapsed:.1f}s) {format_meta_summary(meta)}")
+            if metadata_delay > 0 and index < total:
+                time.sleep(metadata_delay)
+
+        log(f"Metadata done: {cache_count} cached, {fetch_count} fetched")
+        log_metadata_fetch_summary(videos_meta)
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    return write_manifest_outputs(
+        playlists_out,
+        videos_meta,
+        generated_at,
+        filter_unavailable and bool(videos_meta),
+        index_path,
+        manifests_dir,
+    )
 
 
 def main() -> None:
@@ -142,6 +619,22 @@ def main() -> None:
         "--strict",
         action="store_true",
         help="Exit with error if any playlist fails or pool is empty",
+    )
+    parser.add_argument(
+        "--skip-metadata",
+        action="store_true",
+        help="Skip per-video watch-page metadata (faster, no videos map)",
+    )
+    parser.add_argument(
+        "--keep-unavailable",
+        action="store_true",
+        help="Keep non-embeddable, deleted, or unplayable videos in playlists",
+    )
+    parser.add_argument(
+        "--metadata-delay",
+        type=float,
+        default=0.5,
+        help="Seconds between watch-page requests (default 0.5; use 1.0+ for large pools)",
     )
     parser.add_argument(
         "--playlists",
@@ -155,6 +648,27 @@ def main() -> None:
         default=OUTPUT_PATH,
         help="Output JSON path",
     )
+    parser.add_argument(
+        "--no-metadata-cache",
+        action="store_true",
+        help="Always re-fetch watch-page metadata (ignore existing output file)",
+    )
+    parser.add_argument(
+        "--refresh-metadata",
+        action="store_true",
+        help="Re-fetch all metadata even when cached entries exist",
+    )
+    parser.add_argument(
+        "--split-existing",
+        action="store_true",
+        help="Split a monolithic video-pool.json into index + manifests (no network)",
+    )
+    parser.add_argument(
+        "--manifests-dir",
+        type=Path,
+        default=MANIFESTS_DIR,
+        help="Directory for per-playlist manifest JSON files",
+    )
     args = parser.parse_args()
 
     if not args.playlists.is_file():
@@ -166,14 +680,33 @@ def main() -> None:
         print("no playlist IDs in file", file=sys.stderr)
         sys.exit(1)
 
-    pool = build_pool(playlist_ids, args.strict)
-    if not pool["videoIds"]:
+    if args.keep_unavailable and args.skip_metadata:
+        log("note: --keep-unavailable with --skip-metadata leaves playlist scrape unfiltered")
+
+    if args.split_existing:
+        if not args.output.is_file():
+            print(f"missing {args.output}", file=sys.stderr)
+            sys.exit(1)
+        log("vidgrid split_existing starting")
+        split_monolithic_pool(args.output, args.output, args.manifests_dir)
+        return
+
+    log("vidgrid build_feeds starting")
+    pool = build_pool(
+        playlist_ids,
+        args.strict,
+        fetch_metadata=not args.skip_metadata,
+        filter_unavailable=not args.keep_unavailable,
+        metadata_delay=args.metadata_delay,
+        index_path=args.output,
+        manifests_dir=args.manifests_dir,
+        use_metadata_cache=not args.no_metadata_cache,
+        refresh_metadata=args.refresh_metadata,
+    )
+    total_videos = sum(pl.get("videoCount", 0) for pl in pool["playlists"])
+    if total_videos == 0:
         print("video pool is empty", file=sys.stderr)
         sys.exit(1)
-
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(pool, indent=2) + "\n")
-    print(f"wrote {args.output} ({len(pool['videoIds'])} unique videos)")
 
 
 if __name__ == "__main__":

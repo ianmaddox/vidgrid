@@ -18,7 +18,7 @@
   <link rel="icon" sizes="1920x961" href="img/screenshot.lrg.png">
   <link rel="icon" sizes="500x500" href="img/screenshot.med.png">
   <link rel="icon" sizes="200x200" href="img/screenshot.ico.png">
-  <link rel="stylesheet" href="css/wall.css?v=2.2">
+  <link rel="stylesheet" href="css/wall.css?v=2.10">
 </head>
 
 <body>
@@ -26,13 +26,57 @@
   <div id="poolError" hidden></div>
   <div id="tuneIn"></div>
   <div id="tableParent"></div>
+  <div id="wallControls" class="wall-controls" hidden>
+    <div class="wall-controls-toolbar">
+      <div class="wall-control-wrap">
+        <button
+          type="button"
+          id="playlistPickerBtn"
+          class="wall-control-btn"
+          aria-label="Choose playlist"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15V6" />
+            <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+            <path d="M12 12H3" />
+            <path d="M16 6H3" />
+            <path d="M12 18H3" />
+          </svg>
+        </button>
+        <div id="playlistMenu" class="wall-control-menu playlist-menu" role="menu" hidden></div>
+      </div>
+      <div class="wall-control-wrap">
+        <button
+          type="button"
+          id="gridScalerBtn"
+          class="wall-control-btn"
+          aria-label="Grid size"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M14 15H9v-5" />
+            <path d="M16 3h5v5" />
+            <path d="M21 3 9 15" />
+          </svg>
+        </button>
+        <div id="gridScalerMenu" class="wall-control-menu grid-scaler-menu" hidden>
+          <button type="button" id="gridScaleUp" class="grid-scale-step" aria-label="More videos (smaller tiles)">+</button>
+          <button type="button" id="gridScaleDown" class="grid-scale-step" aria-label="Fewer videos (larger tiles)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <audio id="tuneSound" controls autoplay hidden>
     <source src="img/tunein.mp3" type="audio/mpeg">
   </audio>
 
   <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
   <script src="js/table.js"></script>
-  <script src="js/wall.js?v=2.2"></script>
+  <script src="js/wall.js?v=2.22"></script>
 </body>
 
 </html>

@@ -5,3 +5,4 @@ __pycache__/
 .env
 s3-backup
 .vscode
+.vercel
