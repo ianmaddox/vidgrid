@@ -1,54 +1,54 @@
 {
-  "generatedAt": "2026-06-04T06:59:52.292672+00:00",
+  "generatedAt": "2026-06-04T07:12:39.406847+00:00",
   "manifestDir": "playlists",
   "playlists": [
     {
       "id": "PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm",
       "title": "Action: FPV",
       "manifest": "playlists/PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm.json",
-      "videoCount": 41
+      "videoCount": 15
     },
     {
       "id": "PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0",
       "title": "Music videos: Trippy",
       "manifest": "playlists/PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0.json",
-      "videoCount": 99
+      "videoCount": 14
     },
     {
       "id": "PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y",
       "title": "Music videos: Visually interesting",
       "manifest": "playlists/PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y.json",
-      "videoCount": 97
+      "videoCount": 15
     },
     {
       "id": "PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ",
       "title": "Music videos: Cyberpunk",
       "manifest": "playlists/PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ.json",
-      "videoCount": 50
+      "videoCount": 11
     },
     {
       "id": "PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ",
       "title": "Slow TV: Norway",
       "manifest": "playlists/PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ.json",
-      "videoCount": 24
+      "videoCount": 13
     },
     {
       "id": "PL0-sTc_CuqtXb9OKM-FH2_sIMSmtXMeAC",
       "title": "Slow TV: Trains",
       "manifest": "playlists/PL0-sTc_CuqtXb9OKM-FH2_sIMSmtXMeAC.json",
-      "videoCount": 36
+      "videoCount": 15
     },
     {
       "id": "PLTOMHeKhfLingODNtYygngllSB89jYIRg",
       "title": "Slow TV: Will's favorites",
       "manifest": "playlists/PLTOMHeKhfLingODNtYygngllSB89jYIRg.json",
-      "videoCount": 18
+      "videoCount": 13
     },
     {
       "id": "PLYY0cI3sAdGyzB3Y0reZ-I117aE6-v5Gv",
       "title": "Time lapse: Flowers and Plants",
       "manifest": "playlists/PLYY0cI3sAdGyzB3Y0reZ-I117aE6-v5Gv.json",
-      "videoCount": 56
+      "videoCount": 15
     },
     {
       "id": "PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje",
@@ -60,13 +60,13 @@
       "id": "PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v",
       "title": "Time lapse: Farm sim",
       "manifest": "playlists/PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v.json",
-      "videoCount": 100
+      "videoCount": 15
     },
     {
       "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
       "title": "Time lapse: Minecraft",
       "manifest": "playlists/PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ.json",
-      "videoCount": 28
+      "videoCount": 15
     },
     {
       "id": "PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel",

@@ -1,7 +1,7 @@
 {
   "id": "PLTOMHeKhfLingODNtYygngllSB89jYIRg",
   "title": "Will&#39;s Slow TV Playlist",
-  "generatedAt": "2026-06-04T06:59:52.292672+00:00",
+  "generatedAt": "2026-06-04T07:12:39.406847+00:00",
   "videoIds": [
     "1nC-r3yIepk",
     "zmPzbZVUp3g",
@@ -15,12 +15,7 @@
     "4hKQz-WeHpQ",
     "BOUrfPu0RWQ",
     "fIlJyZEbrzo",
-    "qjJhoVH9J3Q",
-    "fTKMHkIutY4",
-    "PxweKS6_xyM",
-    "Ix_yTI_oQFQ",
-    "2aJDiI_2zr8",
-    "zmG8JYiYvgg"
+    "qjJhoVH9J3Q"
   ],
   "videos": {
     "1nC-r3yIepk": {
@@ -171,66 +166,6 @@
       "title": "\u2665\u2665 Relaxing Hot Spring at Yellowstone (3 hours)",
       "author": "MoneySavingVideos",
       "durationSeconds": 11189,
-      "playability": "OK",
-      "embeddable": true,
-      "category": "Travel & Events",
-      "width": 1920,
-      "height": 1080,
-      "aspectRatio": 1.777778,
-      "aspectSource": "streaming"
-    },
-    "fTKMHkIutY4": {
-      "title": "\u2665\u2665 Relaxing  Video of Ocean Waves At \"Devils Punch Bowl\"",
-      "author": "MoneySavingVideos",
-      "durationSeconds": 11665,
-      "playability": "OK",
-      "embeddable": true,
-      "category": "Travel & Events",
-      "width": 1920,
-      "height": 1080,
-      "aspectRatio": 1.777778,
-      "aspectSource": "streaming"
-    },
-    "PxweKS6_xyM": {
-      "title": "\u2665\u2665 Sea Turtles",
-      "author": "MoneySavingVideos",
-      "durationSeconds": 10856,
-      "playability": "OK",
-      "embeddable": true,
-      "category": "Travel & Events",
-      "width": 1920,
-      "height": 1080,
-      "aspectRatio": 1.777778,
-      "aspectSource": "streaming"
-    },
-    "Ix_yTI_oQFQ": {
-      "title": "\u2665\u2665 Relaxing 3 Hour Video of Giant Sea Turtles!",
-      "author": "MoneySavingVideos",
-      "durationSeconds": 11219,
-      "playability": "OK",
-      "embeddable": true,
-      "category": "Travel & Events",
-      "width": 1920,
-      "height": 1080,
-      "aspectRatio": 1.777778,
-      "aspectSource": "streaming"
-    },
-    "2aJDiI_2zr8": {
-      "title": "\u2665\u2665 Relaxing 3-Hour Video of a Mountain River",
-      "author": "MoneySavingVideos",
-      "durationSeconds": 10811,
-      "playability": "OK",
-      "embeddable": true,
-      "category": "Travel & Events",
-      "width": 1920,
-      "height": 1080,
-      "aspectRatio": 1.777778,
-      "aspectSource": "streaming"
-    },
-    "zmG8JYiYvgg": {
-      "title": "\u2665\u2665 Relaxing 3-Hour Video of Large Waterfall",
-      "author": "MoneySavingVideos",
-      "durationSeconds": 10817,
       "playability": "OK",
       "embeddable": true,
       "category": "Travel & Events",
