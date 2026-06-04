@@ -302,10 +302,15 @@ function updatePlaylistMenuSelection() {
 function renderPlaylistMenu() {
   const menu = $("#playlistMenu");
   menu.empty();
-  for (const playlist of allPlaylists) {
-    if (!playlistHasVideos(playlist)) {
-      continue;
-    }
+  const playlists = allPlaylists
+    .filter(playlistHasVideos)
+    .slice()
+    .sort((a, b) => {
+      const labelA = (a.title || a.id).toLowerCase();
+      const labelB = (b.title || b.id).toLowerCase();
+      return labelA.localeCompare(labelB);
+    });
+  for (const playlist of playlists) {
     const label = playlist.title || playlist.id;
     const item = $("<button>", {
       type: "button",

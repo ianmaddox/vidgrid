@@ -57,28 +57,130 @@
       "videoCount": 13
     },
     {
-      "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
-      "title": "Time lapse: Minecraft",
-      "manifest": "playlists/PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ.json",
-      "videoCount": 28
-    },
-    {
       "id": "PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v",
       "title": "Time lapse: Farm sim",
       "manifest": "playlists/PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v.json",
       "videoCount": 100
     },
     {
+      "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
+      "title": "Time lapse: Minecraft",
+      "manifest": "playlists/PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ.json",
+      "videoCount": 28
+    },
+    {
       "id": "PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel",
-      "title": "TIME LAPSE",
+      "title": "Time lapse: Models",
       "manifest": "playlists/PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel.json",
       "videoCount": 15
     },
     {
       "id": "PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk",
-      "title": "Timelapse videos",
+      "title": "Time lapse: Ladies",
       "manifest": "playlists/PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk.json",
       "videoCount": 12
+    },
+    {
+      "id": "PLS_gQd8UB-hICYlDzW7STHjIzJqTFvr6K",
+      "title": "Misc: SNL Digital Shorts",
+      "manifest": "playlists/PLS_gQd8UB-hICYlDzW7STHjIzJqTFvr6K.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLj41mpgKE5KWxmtQ3M7_7JISEn9oTtjjO",
+      "title": "People: Dance",
+      "manifest": "playlists/PLj41mpgKE5KWxmtQ3M7_7JISEn9oTtjjO.json",
+      "videoCount": 14
+    },
+    {
+      "id": "PLIxAOWvrjwWJtMqXGOkX930YSkNY84TF7",
+      "title": "Animals: Webcams",
+      "manifest": "playlists/PLIxAOWvrjwWJtMqXGOkX930YSkNY84TF7.json",
+      "videoCount": 6
+    },
+    {
+      "id": "PLHQwz5lzFeCucoutWV_fMGE8a1chj818P",
+      "title": "Misc: Vintage CGI",
+      "manifest": "playlists/PLHQwz5lzFeCucoutWV_fMGE8a1chj818P.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLGBuKfnErZlAGTaM4VCcpOPCUjpQu0HmW",
+      "title": "Music videos: 70s Disco",
+      "manifest": "playlists/PLGBuKfnErZlAGTaM4VCcpOPCUjpQu0HmW.json",
+      "videoCount": 14
+    },
+    {
+      "id": "PLDsP23I8_pfY66A7oQWnYYhEjVCf2mku_",
+      "title": "Music videos: Anime",
+      "manifest": "playlists/PLDsP23I8_pfY66A7oQWnYYhEjVCf2mku_.json",
+      "videoCount": 10
+    },
+    {
+      "id": "PLV5sfiWhdOIOYyKU-ypfYm_XVegPwbnSd",
+      "title": "Visuals: Anime 18+",
+      "manifest": "playlists/PLV5sfiWhdOIOYyKU-ypfYm_XVegPwbnSd.json",
+      "videoCount": 3
+    },
+    {
+      "id": "PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh",
+      "title": "Misc: Musclemen",
+      "manifest": "playlists/PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh.json",
+      "videoCount": 10
+    },
+    {
+      "id": "PL8n-0YTGy-fG4DSunSyt9QsjPffrDHQlr",
+      "title": "Outdoors: 4K Malibu Walking Tour",
+      "manifest": "playlists/PL8n-0YTGy-fG4DSunSyt9QsjPffrDHQlr.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLFD08D78499A84CEF",
+      "title": "Outdoors: Fishing",
+      "manifest": "playlists/PLFD08D78499A84CEF.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLeCPQtbuJaPtLugP7UijMU-ozdNmkdNFO",
+      "title": "Outdoors: Nature",
+      "manifest": "playlists/PLeCPQtbuJaPtLugP7UijMU-ozdNmkdNFO.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLhxIUmgWJabesj5p9B8mzP1uUNoNXjdNZ",
+      "title": "Outdoors: Nature VHS",
+      "manifest": "playlists/PLhxIUmgWJabesj5p9B8mzP1uUNoNXjdNZ.json",
+      "videoCount": 11
+    },
+    {
+      "id": "PL9vpEzfAbupWL8byt2gybiTgQfUn28J9B",
+      "title": "Misc: 321 Contact Episodes (1980)",
+      "manifest": "playlists/PL9vpEzfAbupWL8byt2gybiTgQfUn28J9B.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP",
+      "title": "America&#39;s Funniest Home Videos Parts 1\u2013357",
+      "manifest": "playlists/PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP.json",
+      "videoCount": 14
+    },
+    {
+      "id": "PLJHfedoaM2Z1OdIjmqH8nUEhpktnT4g8Y",
+      "title": "Funny Cat Videos",
+      "manifest": "playlists/PLJHfedoaM2Z1OdIjmqH8nUEhpktnT4g8Y.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PLIIOUpOge0LvT-g_LNsfX_2ld0pn-CDSZ",
+      "title": "The SFIA Chronology of Episodes",
+      "manifest": "playlists/PLIIOUpOge0LvT-g_LNsfX_2ld0pn-CDSZ.json",
+      "videoCount": 15
+    },
+    {
+      "id": "PL3ITkl1CFjpWr9L2rH_M4Aiyu7I18PXxU",
+      "title": "Old lets plays",
+      "manifest": "playlists/PL3ITkl1CFjpWr9L2rH_M4Aiyu7I18PXxU.json",
+      "videoCount": 15
     }
   ]
 }

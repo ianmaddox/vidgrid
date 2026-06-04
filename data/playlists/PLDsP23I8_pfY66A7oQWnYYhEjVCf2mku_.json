@@ -1,7 +1,139 @@
 {
   "id": "PLDsP23I8_pfY66A7oQWnYYhEjVCf2mku_",
   "title": "Anime Songs Everyone Knows",
-  "generatedAt": "2026-06-04T06:19:49.901320+00:00",
-  "videoIds": [],
-  "videos": {}
+  "generatedAt": "2026-06-04T06:59:52.292672+00:00",
+  "videoIds": [
+    "7aMOurgDB-o",
+    "6xKWiCMKKJg",
+    "3oFTHxkOzjE",
+    "R4vjJrGeh1c",
+    "hcdDnwm4pAE",
+    "LGQCPOMcYJQ",
+    "5txHGxJRwtQ",
+    "ERpK-7K70ws",
+    "QDezQD57h-g",
+    "qR6dzwQahOM"
+  ],
+  "videos": {
+    "7aMOurgDB-o": {
+      "title": "Tokyo Ghoul Opening | \"Unravel\" by TK from Ling Toshite Sigure",
+      "author": "Crunchyroll",
+      "durationSeconds": 92,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": 1.777778,
+      "aspectSource": "streaming"
+    },
+    "6xKWiCMKKJg": {
+      "title": "Pok\u00e9mon Season 1: Indigo League - Opening Theme",
+      "author": "ThePokemonNetwork",
+      "durationSeconds": 60,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1440,
+      "height": 1080,
+      "aspectRatio": 1.333333,
+      "aspectSource": "streaming"
+    },
+    "3oFTHxkOzjE": {
+      "title": "Noragami Aragoto Opening | Ky\u014dran Hey Kids!! by Oral Cigarettes",
+      "author": "Crunchyroll",
+      "durationSeconds": 90,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": 1.777778,
+      "aspectSource": "streaming"
+    },
+    "R4vjJrGeh1c": {
+      "title": "Dragon Ball Z Opening Theme Song   Rock the Dragon 720p HD)   YouTube",
+      "author": "dragon chan",
+      "durationSeconds": 60,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1280,
+      "height": 720,
+      "aspectRatio": 1.777778,
+      "aspectSource": "streaming"
+    },
+    "hcdDnwm4pAE": {
+      "title": "Dragon Ball Z: Cha-La Head-Cha-La - 1989 Japanese Anime Intro Opening Theme HD",
+      "author": "Menelamdir",
+      "durationSeconds": 119,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1440,
+      "height": 1080,
+      "aspectRatio": 1.333333,
+      "aspectSource": "streaming"
+    },
+    "LGQCPOMcYJQ": {
+      "title": "Sailor Moon OP 1 ~ Classic - 1080p HD",
+      "author": "Framework9X",
+      "durationSeconds": 93,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1440,
+      "height": 1080,
+      "aspectRatio": 1.333333,
+      "aspectSource": "streaming"
+    },
+    "5txHGxJRwtQ": {
+      "title": "Sailor Moon Opening (English) *HD*",
+      "author": "sailormoontransform",
+      "durationSeconds": 92,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1280,
+      "height": 720,
+      "aspectRatio": 1.777778,
+      "aspectSource": "streaming"
+    },
+    "ERpK-7K70ws": {
+      "title": "Cardcaptors Opening English HD",
+      "author": "Starterfunn",
+      "durationSeconds": 47,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": 1.777778,
+      "aspectSource": "streaming"
+    },
+    "QDezQD57h-g": {
+      "title": "Cardcaptor Sakura OP 1 [Creditless] [Blu-Ray]",
+      "author": "Digital 90s",
+      "durationSeconds": 81,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "Film & Animation",
+      "width": 960,
+      "height": 720,
+      "aspectRatio": 1.333333,
+      "aspectSource": "streaming"
+    },
+    "qR6dzwQahOM": {
+      "title": "L's theme A",
+      "author": "joseuchiha80",
+      "durationSeconds": 184,
+      "playability": "OK",
+      "embeddable": true,
+      "category": "People & Blogs",
+      "width": 480,
+      "height": 360,
+      "aspectRatio": 1.333333,
+      "aspectSource": "streaming"
+    }
+  }
 }
