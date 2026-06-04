@@ -4,177 +4,206 @@
   "playlists": [
     {
       "id": "PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm",
-      "title": "Action: FPV",
+      "title": "FPV",
       "manifest": "playlists/PLX44vudhbfVCKDcJ1oEO2eZf_n8Jlrlsm.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Action"
     },
     {
       "id": "PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0",
-      "title": "Music videos: Trippy",
+      "title": "Trippy",
       "manifest": "playlists/PLEQNv0J-3Gt4kP-HIdH_MvJFcPtKXg9M0.json",
-      "videoCount": 14
+      "videoCount": 14,
+      "category": "Music videos"
     },
     {
       "id": "PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y",
-      "title": "Music videos: Visually interesting",
+      "title": "Visually interesting",
       "manifest": "playlists/PLzVJWna0GZFHP2L4CSmUKiCoiWPZbY54y.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Music videos"
     },
     {
       "id": "PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ",
-      "title": "Music videos: Cyberpunk",
+      "title": "Cyberpunk",
       "manifest": "playlists/PL8mVy5IdmxxhVp17siDqUrso5JU_9VNcQ.json",
-      "videoCount": 11
+      "videoCount": 11,
+      "category": "Music videos"
     },
     {
       "id": "PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ",
-      "title": "Slow TV: Norway",
+      "title": "Norway",
       "manifest": "playlists/PLmNiCGaOQDewerLinorpprY1gmRn9qDrQ.json",
-      "videoCount": 13
+      "videoCount": 13,
+      "category": "Slow TV"
     },
     {
       "id": "PL0-sTc_CuqtXb9OKM-FH2_sIMSmtXMeAC",
-      "title": "Slow TV: Trains",
+      "title": "Trains",
       "manifest": "playlists/PL0-sTc_CuqtXb9OKM-FH2_sIMSmtXMeAC.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Slow TV"
     },
     {
       "id": "PLTOMHeKhfLingODNtYygngllSB89jYIRg",
-      "title": "Slow TV: Will's favorites",
+      "title": "Will's favorites",
       "manifest": "playlists/PLTOMHeKhfLingODNtYygngllSB89jYIRg.json",
-      "videoCount": 13
+      "videoCount": 13,
+      "category": "Slow TV"
     },
     {
       "id": "PLYY0cI3sAdGyzB3Y0reZ-I117aE6-v5Gv",
-      "title": "Time lapse: Flowers and Plants",
+      "title": "Flowers and Plants",
       "manifest": "playlists/PLYY0cI3sAdGyzB3Y0reZ-I117aE6-v5Gv.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Time lapse"
     },
     {
       "id": "PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje",
-      "title": "Time lapse: Graffiti",
+      "title": "Graffiti",
       "manifest": "playlists/PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje.json",
-      "videoCount": 13
+      "videoCount": 13,
+      "category": "Time lapse"
     },
     {
       "id": "PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v",
-      "title": "Time lapse: Farm sim",
+      "title": "Farm sim",
       "manifest": "playlists/PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Time lapse"
     },
     {
       "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
-      "title": "Time lapse: Minecraft",
+      "title": "Minecraft",
       "manifest": "playlists/PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Time lapse"
     },
     {
       "id": "PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel",
-      "title": "Time lapse: Models",
+      "title": "Models",
       "manifest": "playlists/PLh0NyC0oE-4WIEdTh9Rir6gfCd6elRUel.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Time lapse"
     },
     {
       "id": "PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk",
-      "title": "People: Ladies",
+      "title": "Ladies",
       "manifest": "playlists/PLCjOQAVKpMcBYWFhmA2JLVK8iBWCHWiNk.json",
-      "videoCount": 12
+      "videoCount": 12,
+      "category": "People"
     },
     {
       "id": "PLS_gQd8UB-hICYlDzW7STHjIzJqTFvr6K",
-      "title": "Misc: SNL Digital Shorts",
+      "title": "SNL Digital Shorts",
       "manifest": "playlists/PLS_gQd8UB-hICYlDzW7STHjIzJqTFvr6K.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Misc"
     },
     {
       "id": "PLj41mpgKE5KWxmtQ3M7_7JISEn9oTtjjO",
-      "title": "People: Dance",
+      "title": "Dance",
       "manifest": "playlists/PLj41mpgKE5KWxmtQ3M7_7JISEn9oTtjjO.json",
-      "videoCount": 14
+      "videoCount": 14,
+      "category": "People"
     },
     {
       "id": "PLIxAOWvrjwWJtMqXGOkX930YSkNY84TF7",
-      "title": "Animals: Webcams",
+      "title": "Webcams",
       "manifest": "playlists/PLIxAOWvrjwWJtMqXGOkX930YSkNY84TF7.json",
-      "videoCount": 6
+      "videoCount": 6,
+      "category": "Animals"
     },
     {
       "id": "PLHQwz5lzFeCucoutWV_fMGE8a1chj818P",
-      "title": "Misc: Vintage CGI",
+      "title": "Vintage CGI",
       "manifest": "playlists/PLHQwz5lzFeCucoutWV_fMGE8a1chj818P.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Misc"
     },
     {
       "id": "PLGBuKfnErZlAGTaM4VCcpOPCUjpQu0HmW",
-      "title": "Music videos: 70s Disco",
+      "title": "70s Disco",
       "manifest": "playlists/PLGBuKfnErZlAGTaM4VCcpOPCUjpQu0HmW.json",
-      "videoCount": 14
+      "videoCount": 14,
+      "category": "Music videos"
     },
     {
       "id": "PLDsP23I8_pfY66A7oQWnYYhEjVCf2mku_",
-      "title": "Music videos: Anime",
+      "title": "Anime",
       "manifest": "playlists/PLDsP23I8_pfY66A7oQWnYYhEjVCf2mku_.json",
-      "videoCount": 10
+      "videoCount": 10,
+      "category": "Music videos"
     },
     {
       "id": "PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh",
-      "title": "People: Musclemen",
+      "title": "Musclemen",
       "manifest": "playlists/PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh.json",
-      "videoCount": 10
+      "videoCount": 10,
+      "category": "People"
     },
     {
       "id": "PL8n-0YTGy-fG4DSunSyt9QsjPffrDHQlr",
-      "title": "Outdoors: 4K Malibu Walking Tour",
+      "title": "4K Malibu Walking Tour",
       "manifest": "playlists/PL8n-0YTGy-fG4DSunSyt9QsjPffrDHQlr.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Outdoors"
     },
     {
       "id": "PLFD08D78499A84CEF",
-      "title": "Outdoors: Fishing",
+      "title": "Fishing",
       "manifest": "playlists/PLFD08D78499A84CEF.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Outdoors"
     },
     {
       "id": "PLeCPQtbuJaPtLugP7UijMU-ozdNmkdNFO",
-      "title": "Outdoors: Nature",
+      "title": "Nature",
       "manifest": "playlists/PLeCPQtbuJaPtLugP7UijMU-ozdNmkdNFO.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Outdoors"
     },
     {
       "id": "PLhxIUmgWJabesj5p9B8mzP1uUNoNXjdNZ",
-      "title": "Outdoors: Nature VHS",
+      "title": "Nature VHS",
       "manifest": "playlists/PLhxIUmgWJabesj5p9B8mzP1uUNoNXjdNZ.json",
-      "videoCount": 11
+      "videoCount": 11,
+      "category": "Outdoors"
     },
     {
       "id": "PL9vpEzfAbupWL8byt2gybiTgQfUn28J9B",
-      "title": "Misc: 321 Contact (1980)",
+      "title": "321 Contact (1980)",
       "manifest": "playlists/PL9vpEzfAbupWL8byt2gybiTgQfUn28J9B.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Misc"
     },
     {
       "id": "PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP",
-      "title": "Funny: America's Funniest Home Videos",
+      "title": "America's Funniest Home Videos",
       "manifest": "playlists/PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP.json",
-      "videoCount": 14
+      "videoCount": 14,
+      "category": "Funny"
     },
     {
       "id": "PLJHfedoaM2Z1OdIjmqH8nUEhpktnT4g8Y",
-      "title": "Funny: Cats",
+      "title": "Cats",
       "manifest": "playlists/PLJHfedoaM2Z1OdIjmqH8nUEhpktnT4g8Y.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Funny"
     },
     {
       "id": "PLIIOUpOge0LvT-g_LNsfX_2ld0pn-CDSZ",
-      "title": "Visuals: Sci Fi",
+      "title": "Sci Fi",
       "manifest": "playlists/PLIIOUpOge0LvT-g_LNsfX_2ld0pn-CDSZ.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Visuals"
     },
     {
       "id": "PL3ITkl1CFjpWr9L2rH_M4Aiyu7I18PXxU",
-      "title": "Visuals: Lets play",
+      "title": "Lets play",
       "manifest": "playlists/PL3ITkl1CFjpWr9L2rH_M4Aiyu7I18PXxU.json",
-      "videoCount": 15
+      "videoCount": 15,
+      "category": "Visuals"
     }
   ]
 }

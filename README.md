@@ -31,17 +31,21 @@ python scripts/build_feeds.py
 
 Output:
 
-- `data/video-pool.json` — **index** only (`manifestDir`, `playlists[]` with `id`, `title`,
-  `manifest`, `videoCount`)
+- `data/video-pool.json` — **index** only (`manifestDir`, `playlists[]` with `id`, optional
+  `category`, `title`, `manifest`, `videoCount`). Display title is `category + ": " + title`
+  when category is set.
 - `data/playlists/<PL_ID>.json` — per-playlist manifest (`videoIds`, `videos` metadata map)
 
 Committed so the site works without rebuilding on every deploy. The wall loads the index first,
 then fetches **one** manifest for the active playlist (or when you switch themes).
 
-**Custom titles:** Edit `title` in the index or manifest. Rebuilds keep your title when it is
-non-blank; only empty titles are refreshed from YouTube. During a long build, each index write
-merges with the file on disk so finished playlists keep hand-edited names and playlists not
-processed yet stay listed.
+**Custom titles:** Use `category` and `title` in the index (e.g. `"category": "Slow TV"`,
+`"title": "Trains"`). Legacy `"title": "Slow TV: Trains"` is split automatically. Rebuilds
+keep hand-edited fields; each index write merges with the file on disk. One-shot migration:
+
+```bash
+python scripts/build_feeds.py --migrate-index
+```
 
 To split an existing monolithic `video-pool.json` without re-scraping YouTube:
 

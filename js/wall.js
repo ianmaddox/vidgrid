@@ -17,6 +17,7 @@ const cellRetries = {};
 const cellLastVideo = {};
 const cellLastHealthy = {};
 const cellLastTime = {};
+const cellVideoStarted = {};
 const cellRevealed = {};
 const cellStallHits = {};
 const cellStartHits = {};
@@ -40,6 +41,67 @@ let cols;
 let cells;
 
 const POOL_URL = "data/video-pool.json";
+
+function trackAnalyticsEvent(eventName, params) {
+  if (typeof gtag !== "function") {
+    return;
+  }
+  gtag("event", eventName, params || {});
+}
+
+function splitCategoryTitle(combined) {
+  const colon = combined.indexOf(": ");
+  if (colon > 0) {
+    return {
+      category: combined.slice(0, colon).trim(),
+      title: combined.slice(colon + 2).trim(),
+    };
+  }
+  return { category: "", title: combined.trim() };
+}
+
+function normalizePlaylist(playlist) {
+  if (!playlist || typeof playlist !== "object") {
+    return playlist;
+  }
+  const existingCategory = (playlist.category || "").trim();
+  if (existingCategory) {
+    return playlist;
+  }
+  const combined = (playlist.title || "").trim();
+  if (combined.includes(": ")) {
+    const parts = splitCategoryTitle(combined);
+    playlist.category = parts.category;
+    playlist.title = parts.title || playlist.id;
+  }
+  return playlist;
+}
+
+function playlistDisplayTitle(playlist) {
+  const category = (playlist.category || "").trim();
+  const title = (playlist.title || playlist.id || "").trim();
+  if (category) {
+    return category + ": " + title;
+  }
+  return title || playlist.id;
+}
+
+function playlistAnalyticsParams(playlist) {
+  return {
+    category: (playlist.category || "").trim(),
+    title: (playlist.title || playlist.id || "").trim(),
+  };
+}
+
+function videoAnalyticsParams(cellId) {
+  const params = {
+    video_id: cellLastVideo[cellId] || "",
+  };
+  if (activePlaylist) {
+    Object.assign(params, playlistAnalyticsParams(activePlaylist));
+  }
+  return params;
+}
 const PLAYLIST_COOKIE = "vidgrid_playlist";
 const PLAYLIST_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const POPCORN_MS = 10000;
@@ -239,7 +301,7 @@ function applyActivePlaylist(playlist) {
 }
 
 function loadPoolIndex(pool) {
-  allPlaylists = pool.playlists || [];
+  allPlaylists = (pool.playlists || []).map(normalizePlaylist);
   if (!allPlaylists.length) {
     throw new Error(
       "video-pool.json has no playlists — run: python scripts/build_feeds.py"
@@ -249,7 +311,7 @@ function loadPoolIndex(pool) {
 }
 
 function loadPoolLegacy(pool) {
-  allPlaylists = pool.playlists || [];
+  allPlaylists = (pool.playlists || []).map(normalizePlaylist);
   if (!allPlaylists.length) {
     throw new Error(
       "video-pool.json has no playlists — run: python scripts/build_feeds.py"
@@ -275,7 +337,7 @@ async function activateInitialPlaylist(pool, legacy) {
   const source = fromCookie ? "cookie" : "random";
   console.log(
     "Loaded playlist",
-    activePlaylist.title || activePlaylist.id,
+    playlistDisplayTitle(activePlaylist),
     "(" + source + ",",
     allVids.length,
     "videos, generated",
@@ -306,12 +368,12 @@ function renderPlaylistMenu() {
     .filter(playlistHasVideos)
     .slice()
     .sort((a, b) => {
-      const labelA = (a.title || a.id).toLowerCase();
-      const labelB = (b.title || b.id).toLowerCase();
+      const labelA = playlistDisplayTitle(a).toLowerCase();
+      const labelB = playlistDisplayTitle(b).toLowerCase();
       return labelA.localeCompare(labelB);
     });
   for (const playlist of playlists) {
-    const label = playlist.title || playlist.id;
+    const label = playlistDisplayTitle(playlist);
     const item = $("<button>", {
       type: "button",
       class: "playlist-menu-item",
@@ -382,7 +444,8 @@ async function switchPlaylist(playlist) {
   writePlaylistCookie(playlist.id);
   applyActivePlaylist(playlist);
   updatePlaylistMenuSelection();
-  console.log("Switched playlist:", activePlaylist.title || activePlaylist.id);
+  console.log("Switched playlist:", playlistDisplayTitle(activePlaylist));
+  trackAnalyticsEvent("playlist_change", playlistAnalyticsParams(activePlaylist));
 
   const cellIds = allGridCellIds();
   if (!cellIds.length) {
@@ -668,6 +731,7 @@ function mountGridCells() {
 
 function scaleGridUp() {
   gridScaleDelta += 1;
+  trackAnalyticsEvent("grid_expand");
   applyGridShape();
 }
 
@@ -676,6 +740,7 @@ function scaleGridDown() {
     return;
   }
   gridScaleDelta -= 1;
+  trackAnalyticsEvent("grid_contract");
   applyGridShape();
 }
 
@@ -735,6 +800,7 @@ function markCellHealthy(id) {
 
 function resetCellPlaybackState(id) {
   delete cellLastTime[id];
+  delete cellVideoStarted[id];
   delete cellRevealed[id];
   delete cellStallHits[id];
   delete cellStartHits[id];
@@ -929,11 +995,13 @@ function handleToobClick(id) {
   if (soundCell === id && soundEnabled) {
     muteCellAudio(id);
     soundEnabled = false;
+    trackAnalyticsEvent("audio_stop");
     return;
   }
 
   if (soundCell && soundCell !== id) {
     muteCellAudio(soundCell);
+    trackAnalyticsEvent("audio_switch");
   }
 
   soundCell = id;
@@ -945,6 +1013,7 @@ function handleToobClick(id) {
   }
   soundEnabled = true;
   unMuteCellAudio(id);
+  trackAnalyticsEvent("audio_start");
 }
 
 function fadeOut(id) {
@@ -1079,6 +1148,15 @@ function pollCellTime(id, player) {
   }
   const time = player.getCurrentTime();
   const prev = cellLastTime[id];
+
+  if (
+    !cellVideoStarted[id]
+    && prev !== undefined
+    && time > prev + healthCfg.stallEpsilon
+  ) {
+    cellVideoStarted[id] = true;
+    trackAnalyticsEvent("video_start", videoAnalyticsParams(id));
+  }
 
   if (time > 0) {
     if (!cellRevealed[id]) {

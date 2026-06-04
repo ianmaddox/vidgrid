@@ -250,6 +250,52 @@ def manifest_web_path(playlist_id: str) -> str:
     return f"{MANIFEST_WEB_DIR}/{playlist_id}.json"
 
 
+def split_category_title(combined: str) -> tuple[str, str]:
+    stripped = (combined or "").strip()
+    if ": " in stripped:
+        category, title = stripped.split(": ", 1)
+        return category.strip(), title.strip()
+    return "", stripped
+
+
+def format_category_title(category: str, title: str) -> str:
+    cat = (category or "").strip()
+    tit = (title or "").strip()
+    if cat and tit:
+        return f"{cat}: {tit}"
+    return tit or cat
+
+
+def build_index_entry(playlist_id: str, label: str, video_count: int) -> dict:
+    category, title = split_category_title(label)
+    if not title:
+        title = playlist_id
+    entry: dict = {
+        "id": playlist_id,
+        "title": title,
+        "manifest": manifest_web_path(playlist_id),
+        "videoCount": video_count,
+    }
+    if category:
+        entry["category"] = category
+    return entry
+
+
+def normalize_index_playlist_entry(entry: dict) -> dict:
+    category = (entry.get("category") or "").strip()
+    title = (entry.get("title") or "").strip()
+    if category:
+        return entry
+    if ": " in title:
+        cat, tit = split_category_title(title)
+        normalized = dict(entry)
+        normalized["title"] = tit or title
+        if cat:
+            normalized["category"] = cat
+        return normalized
+    return entry
+
+
 def load_cached_playlist_titles(index_path: Path) -> dict[str, str]:
     titles: dict[str, str] = {}
     if index_path.is_file():
@@ -264,9 +310,13 @@ def load_cached_playlist_titles(index_path: Path) -> dict[str, str]:
                 playlist_id = playlist.get("id")
                 if not playlist_id:
                     continue
+                category = (playlist.get("category") or "").strip()
                 title = (playlist.get("title") or "").strip()
-                if title:
-                    titles[playlist_id] = title
+                label = format_category_title(category, title)
+                if not label and title:
+                    label = title
+                if label:
+                    titles[playlist_id] = label
     if MANIFESTS_DIR.is_dir():
         for path in MANIFESTS_DIR.glob("PL*.json"):
             try:
@@ -378,12 +428,7 @@ def split_monolithic_pool(
         manifest_path = manifest_file_path(playlist_id)
         write_playlist_manifest(manifest, manifest_path)
         index_playlists.append(
-            {
-                "id": playlist_id,
-                "title": manifest["title"],
-                "manifest": manifest_web_path(playlist_id),
-                "videoCount": len(video_ids),
-            }
+            build_index_entry(playlist_id, manifest["title"], len(video_ids))
         )
         total_videos += len(video_ids)
         log(f"  wrote {manifest_path.name} ({len(video_ids)} videos)")
@@ -468,13 +513,27 @@ def load_existing_index_playlists(index_path: Path) -> list[dict]:
 
 
 def merge_index_entry(fresh: dict, prior: dict | None) -> dict:
-    """Keep a non-blank title already on disk (hand-edited in the index)."""
+    """Keep hand-edited category/title from the index on disk."""
     merged = dict(fresh)
-    if prior:
-        prior_title = (prior.get("title") or "").strip()
+    if not prior:
+        return normalize_index_playlist_entry(merged)
+    prior_category = (prior.get("category") or "").strip()
+    prior_title = (prior.get("title") or "").strip()
+    if prior_category or (prior_title and ": " not in prior_title):
+        if prior_category:
+            merged["category"] = prior_category
+        else:
+            merged.pop("category", None)
         if prior_title:
             merged["title"] = prior_title
-    return merged
+    elif prior_title:
+        category, title = split_category_title(prior_title)
+        merged["title"] = title or merged.get("title", "")
+        if category:
+            merged["category"] = category
+        else:
+            merged.pop("category", None)
+    return normalize_index_playlist_entry(merged)
 
 
 def write_pool_index(
@@ -497,7 +556,7 @@ def write_pool_index(
                 merge_index_entry(processed_by_id[playlist_id], prior)
             )
         else:
-            merged.append(dict(prior))
+            merged.append(normalize_index_playlist_entry(dict(prior)))
         seen.add(playlist_id)
 
     for fresh in processed_playlists:
@@ -557,12 +616,7 @@ def emit_playlist_manifest(
     }
     write_playlist_manifest(manifest, manifest_path)
     log(f"  wrote {manifest_path.name} ({len(video_ids)} videos)")
-    index_entry = {
-        "id": playlist["id"],
-        "title": title,
-        "manifest": manifest_web_path(playlist["id"]),
-        "videoCount": len(video_ids),
-    }
+    index_entry = build_index_entry(playlist["id"], title, len(video_ids))
     return index_entry, dropped
 
 
@@ -772,6 +826,11 @@ def main() -> None:
         help="Re-fetch watch-page metadata for every video (default: backfill missing only)",
     )
     parser.add_argument(
+        "--migrate-index",
+        action="store_true",
+        help='Split "Category: Title" index entries into category + title fields (no network)',
+    )
+    parser.add_argument(
         "--split-existing",
         action="store_true",
         help="Split a monolithic video-pool.json into index + manifests (no network)",
@@ -795,6 +854,22 @@ def main() -> None:
 
     if args.keep_unavailable and args.skip_metadata:
         log("note: --keep-unavailable with --skip-metadata leaves playlist scrape unfiltered")
+
+    if args.migrate_index:
+        if not args.output.is_file():
+            print(f"missing {args.output}", file=sys.stderr)
+            sys.exit(1)
+        log("vidgrid migrate_index starting")
+        pool = json.loads(args.output.read_text(encoding="utf-8"))
+        playlists = [
+            normalize_index_playlist_entry(dict(entry))
+            for entry in pool.get("playlists") or []
+            if isinstance(entry, dict) and entry.get("id")
+        ]
+        pool["playlists"] = playlists
+        args.output.write_text(json.dumps(pool, indent=2) + "\n", encoding="utf-8")
+        log(f"migrated {len(playlists)} playlist(s) in {args.output}")
+        return
 
     if args.split_existing:
         if not args.output.is_file():
