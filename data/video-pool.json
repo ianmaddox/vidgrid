@@ -55,6 +55,18 @@
       "title": "Time lapse: Graffiti",
       "manifest": "playlists/PLI9LLYghUl6VxC7RfuZa9KL9vzEcPvyje.json",
       "videoCount": 46
+    },
+    {
+      "id": "PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ",
+      "title": "Time lapse: Minecraft",
+      "manifest": "playlists/PL1odvqTyp1B0CO0MHyIrIgIpstCjHeCWJ.json",
+      "videoCount": 28
+    },
+    {
+      "id": "PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v",
+      "title": "Time lapse: Nature",
+      "manifest": "playlists/PLgyIvaJ3LYjm9stH2Z9UPQyMMe7eq745v.json",
+      "videoCount": 100
     }
   ]
 }

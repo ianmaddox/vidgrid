@@ -379,7 +379,7 @@ async function switchPlaylist(playlist) {
   updatePlaylistMenuSelection();
   console.log("Switched playlist:", activePlaylist.title || activePlaylist.id);
 
-  const cellIds = Object.keys(players);
+  const cellIds = allGridCellIds();
   if (!cellIds.length) {
     return;
   }
@@ -511,6 +511,33 @@ function insertRowAtRandomPosition() {
       play(id);
     }
   }
+}
+
+function allGridCellIds() {
+  if (t && typeof t.idLinear === "function" && cells > 0) {
+    const ids = [];
+    for (let index = 0; index < cells; index++) {
+      const id = t.idLinear(index);
+      if (id) {
+        ids.push(id);
+      }
+    }
+    if (ids.length) {
+      return ids;
+    }
+  }
+  rebuildMapFromDom();
+  const ids = [];
+  if (t && t.map) {
+    for (const row of t.map) {
+      for (const cell of row) {
+        if (cell && cell.id) {
+          ids.push(cell.id);
+        }
+      }
+    }
+  }
+  return ids;
 }
 
 function rebuildMapFromDom() {
