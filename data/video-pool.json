@@ -117,12 +117,6 @@
       "videoCount": 10
     },
     {
-      "id": "PLV5sfiWhdOIOYyKU-ypfYm_XVegPwbnSd",
-      "title": "Visuals: Anime 18+",
-      "manifest": "playlists/PLV5sfiWhdOIOYyKU-ypfYm_XVegPwbnSd.json",
-      "videoCount": 3
-    },
-    {
       "id": "PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh",
       "title": "People: Musclemen",
       "manifest": "playlists/PLrzNeVYXNqhKajy4WlAJGj6HYJxiYr-zh.json",
@@ -160,7 +154,7 @@
     },
     {
       "id": "PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP",
-      "title": "Funny: America&#39;s Funniest Home Videos",
+      "title": "Funny: America's Funniest Home Videos",
       "manifest": "playlists/PLhlkWwdy1M6dYe3Qfr8130EuIm7lP6zWP.json",
       "videoCount": 14
     },
